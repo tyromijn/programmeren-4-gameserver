@@ -2,13 +2,10 @@ const Game = require('../models/game.model')
 const ApiError = require('../models/apierror.model')
 
 let games = [
-	new Game('Battlefield 5', 'EA', 2018, 'FPS')
+	new Game('Battlefield 5', 'EA', 2018, 'FPS'),
+	new Game('Call of Duty: Black Ops 4', 'Treyarch', 2018, 'FPS'),
+	new Game('Minecraft', 'Mojang', 2010, 'Sandbox'),
 ]
-
-// Voorbeeld werken met arrays
-games.forEach((item) => {
-	// doe iets met item
-})
 
 module.exports = {
 
@@ -18,27 +15,69 @@ module.exports = {
 	},
 
 	getById(req, res, next) {
-		const id = req.params.gameId
-		console.log('id = ' + id)
+		const id = req.params.id
+		console.log("GET REQUEST FOR ID: " + id)
 
-		if(id < 0 || id > games.length-1){
+		if (id < 0 || id > games.length - 1) {
 			next(new ApiError('Id does not exist', 404))
 		} else {
 			res.status(200).json(games[id]).end()
 		}
 	},
 
-	addNewGame(req, res) {
+	addNewGame(req, res, next) {
 		console.log('gameController.addNewGame called')
 		console.dir(req.body)
 
-		// add game to array of games
-		const game = new Game(req.body.name, req.body.producer, req.body.year, req.body.type)
-		games.push(game)
+		// Should get moved to other file / object class
+		if (req.body.name == null || req.body.name == '') {
+			next(new ApiError('Naam is ongeldig', 500))
+		} else if (req.body.producer == null || req.body.producer == '') {
+			next(new ApiError('Producer is ongeldig', 500))
+		} else if (req.body.year == null || req.body.year < 1960 || req.body.year > 2023) {
+			next(new ApiError('Jaar is ongeldig', 500))
+		} else if (req.body.type == null || req.body.type == '') {
+			next(new ApiError('Type is ongeldig', 500))
+		}else{
+			// add game to array of games
+			const game = new Game(req.body.name, req.body.producer, req.body.year, req.body.type)
+			games.push(game)
 
-		res.status(200).json({ 
-			message: req.body.name + ' succesvol toegevoegd'
-		}).end()
+			res.status(200).json({
+				message: req.body.name + ' succesvol toegevoegd'
+			}).end()
+		}
+	},
+
+	delete(req, res, next) {
+		const id = req.params.id
+		if (id < 0 || id > games.length - 1) {
+			next(new ApiError('Id does not exist', 404))
+		} else {
+			games.splice(id, 1)
+			res.status(200).json({message: 'game succesvol verwijderd'}).end()
+		}
+	},
+
+	put(req, res, next) {
+		const id = req.params.id
+		if (id < 0 || id > games.length - 1) {
+			next(new ApiError('Id does not exist', 404))
+		} else {
+			// Should get moved to other file / object class
+			if (req.body.name == null || req.body.name == ''){
+				next(new ApiError('Naam is ongeldig', 500))
+			}else if(req.body.producer == null || req.body.producer == ''){
+				next(new ApiError('Producer is ongeldig', 500))
+			}else if(req.body.year == null || req.body.year < 1960 || req.body.year > 2023){
+				next(new ApiError('Jaar is ongeldig', 500))
+			}else if (req.body.type == null || req.body.type == ''){
+				next(new ApiError('Type is ongeldig', 500))
+			}else{
+				const game = new Game(req.body.name, req.body.producer, req.body.year, req.body.type)
+				games.splice(id, 1, game)
+				res.status(200).json({ message: req.body.name + ' succesvol geüpdate' }).end()
+			}
+		}
 	}
-
 }
