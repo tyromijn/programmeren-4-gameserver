@@ -144,7 +144,7 @@ describe('Games API GET', () => {
                 res.body.should.be.a('array')
 
                 const response = res.body
-                
+                response.should.have.length(4)
                 response.forEach(element => {
                     element.should.have.property('name')
                     element.should.have.property('producer')
@@ -170,11 +170,27 @@ describe('Games API GET', () => {
                 done()
             })
     })
+    it('should return an error when id is not found', (done) => {
+        chai.request(server)
+            .get(endpointToTest + '/123')
+            .send()
+            .end((err, res) => {
+                res.should.have.status(404)
+                res.body.should.be.a('object')
 
+                const response = res.body
+                response.should.have.property('error')
+                const error = response.error
+                error.should.have.property('message').equals('Id does not exist')
+                error.should.have.property('code').equals(404)
+                error.should.have.property('date')
+                done()
+            })
+    })
 })
 
 describe('Games API PUT', () => {
-    it('should return a succes when game has been updated', (done) => {
+    it('should return succes when a game has been updated', (done) => {
         chai.request(server)
             .put(endpointToTest+"/1")
             .send({
@@ -196,7 +212,7 @@ describe('Games API PUT', () => {
 })
 
 describe('Games API DELETE', () => {
-    it('should return a succes when game has been updated', (done) => {
+    it('should return succes when a game has been deleted', (done) => {
         chai.request(server)
             .delete(endpointToTest + "/1")
             .send()
