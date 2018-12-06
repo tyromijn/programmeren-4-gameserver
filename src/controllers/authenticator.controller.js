@@ -43,6 +43,7 @@ module.exports = {
     },
 
     update(req, res, next){
+        // Crashes application, idk why
         if (req.body.email == null || req.body.email == '') {
             return next(new ApiError('Email is ongeldig', 500))
         } else if (req.body.password == null || req.body.password == '') {
@@ -53,14 +54,14 @@ module.exports = {
         const date = new Date()
         console.log(req.body.newpassword+"\n"+date+"\n"+req.body.email+"\n"+req.body.password)
         pool.execute(
-            "UPDATE users SET password = ?, LaatstGewijzigdOp = ? WHERE email = ? AND password = ?"),
+            "UPDATE users SET password = ?, LaatstGewijzigdOp = ? WHERE email = ? AND password = ?",
             [req.body.newpassword, date, req.body.email, req.body.password],
             function (err, results, fields) {
                 if (err){
                     return next(new ApiError(err, 500))
                 }
              res.status(200).json({ message: req.body.email + ' succesvol geüpdate' }).end()
-        }
+        })
     },
 
     delete(req, res, next) {
