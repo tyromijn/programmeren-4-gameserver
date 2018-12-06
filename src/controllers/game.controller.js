@@ -28,10 +28,7 @@ module.exports = {
 			function (err, results, fields){
 				if (err){
 					return next(new ApiError(err, 500))
-				}else if(results[0] == null){
-					return next(new ApiError(`kon geen game vinden met id ${id}`, 500))
 				}
-
 				res.status(200).json({
 					result: results
 				}).end()
